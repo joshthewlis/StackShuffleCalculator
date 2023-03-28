@@ -1,21 +1,64 @@
-﻿namespace StackShuffleCalculator
+﻿using System.Diagnostics;
+
+namespace StackShuffleCalculator
 {
     internal class Program
     {
+        static int numberOfCards = 0;
+        static int numberOfStacks = 0;
+
+        static Stopwatch stopwatch = new Stopwatch();
+
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("JTs Stack/Pile Shuffle Calculator!");
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Console.ForegroundColor = ConsoleColor.White;
+
+            // Number of Cards
+            Console.WriteLine("Please enter the number of cards in the deck:");
+            while (numberOfCards <= 0)
+            {
+                int.TryParse(Console.ReadLine(), out numberOfCards);
+
+                if (numberOfCards == 0)
+                {
+                    Console.WriteLine("Oh dear! That is an incorrect input. Please try again:");
+                }
+            }
+
+            // Number of Stacks
+            Console.WriteLine("Please enter the number of stacks:");
+            while (numberOfStacks <= 0)
+            {
+                int.TryParse(Console.ReadLine(), out numberOfStacks);
+
+                if (numberOfStacks == 0)
+                {
+                    Console.WriteLine("Oh dear! That is an incorrect input. Please try again:");
+                }
+            }
+
 
             // BUILD DECK
             List<int> originalDeck = new List<int>();
-            for(int i = 1; i <= 100; i++)
+            for (int i = 1; i <= numberOfCards; i++)
                 originalDeck.Add(i);
 
             // OUTPUT DECK
+            Console.WriteLine("Original Deck Order:");
             WriteLineDeck(originalDeck);
 
-
+            // BUILD PLAY DECK
             var deck = originalDeck;
+
+            // LETS SHUFFLE
+            // START TIMER
+            stopwatch.Start();
 
             bool complete = false;
             int shuffleNumber = 0;
@@ -23,7 +66,7 @@
             {
                 Console.WriteLine();
                 shuffleNumber++;
-                Console.WriteLine(String.Format("Shuffle #{0}:", shuffleNumber));
+                Console.WriteLine("Shuffle #{0}:", shuffleNumber);
                 deck = Shuffle(deck);
                 WriteLineDeck(deck);
 
@@ -31,45 +74,50 @@
                     complete = true;
             }
 
+            stopwatch.Stop();
+
+            // SHUFFLE COMPLETE
             Console.WriteLine("");
             Console.WriteLine("COMPLETE!!!!");
-            Console.WriteLine(shuffleNumber + " Shuffles required");
+            Console.WriteLine("{0} Shuffles required", shuffleNumber);
+            Console.WriteLine("Solution found in {0} milliseconds", stopwatch.ElapsedMilliseconds);
             Console.WriteLine("");
 
+            // READ KEY FOR USER TO VIEW RESULTS
             Console.ReadLine();
         }
 
 
         private static List<int> Shuffle(List<int> deck)
         {
-            var stack1 = new Stack<int>();
-            var stack2 = new Stack<int>();
-            var stack3 = new Stack<int>();
-            var stack4 = new Stack<int>();
+            var stacks = new Stack<int>[numberOfStacks];
 
-            for(int i = 0; i < deck.Count; i+=4)
+            // INITALIZE MY STACKS
+            for (int i = 0; i < numberOfStacks; i++)
+                stacks[i] = new Stack<int>();
+
+            int stackNumber = 0;
+
+            for (int i = 0; i < deck.Count; i++)
             {
-                stack1.Push(deck[i]);
-                stack2.Push(deck[i+1]);
-                stack3.Push(deck[i+2]);
-                stack4.Push(deck[i+3]);
+                stacks[stackNumber].Push(deck[i]);
+                stackNumber++;
+
+                if (stackNumber > stacks.Length - 1)
+                    stackNumber = 0;
             }
 
             var outputStack = new List<int>();
-            outputStack.AddRange(stack4);
-            outputStack.AddRange(stack3);
-            outputStack.AddRange(stack2);
-            outputStack.AddRange(stack1);
+            for (int i = stacks.Length - 1; i >= 0; i--)
+                outputStack.AddRange(stacks[i]);
 
             return outputStack;
         }
 
         private static void WriteLineDeck(List<int> deck)
         {
-            foreach (int i in deck)
-                Console.Write(String.Format("{0}, ", i));
-
-            Console.WriteLine();                   
+            deck.ForEach(i => Console.Write("{0}, ", i));
+            Console.WriteLine();
         }
 
     }
